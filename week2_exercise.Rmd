@@ -62,6 +62,20 @@ wildschwein |>
 
 ## Task 3: Deriving movement parameters I: Speed
 
+```{r}
+# calculate step length
+wildschwein <- wildschwein |> 
+  group_by(TierName) |> 
+  mutate(steplength_m = sqrt((E - lead(E))^2 + (N - lead(N))^2))
+
+# calculate speed (m/s)
+
+wildschwein <- wildschwein |> 
+  mutate(speed_ms = steplength_m/diff_s)
+
+# visualizing speed histogram
+hist(log10(wildschwein$speed_ms), 100)
+```
 
 ## Task 4: Cross-scale movement analysis
 
