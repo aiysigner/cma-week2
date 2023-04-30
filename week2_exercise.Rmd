@@ -11,9 +11,57 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Task 1: Import Data
 
+```{r}
+library("readr") 
+library("sf") 
+library(ggplot2)
+library(tidyverse)
+
+wildschwein <- read_delim("data/wildschwein_BE_2056.csv", ",")
+
+wildschwein <- st_as_sf(wildschwein, coords = c("E", "N"), crs = 2056, remove = FALSE)
+```
+
 ## Task 2: Getting an overview
+```{r}
+# calculate time difference between subsequent rows in seconds
+wildschwein <- wildschwein |> 
+  group_by(TierName) |> 
+  mutate(diff_s = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC)))
+```
+
+```{r}
+# how many individuals were tracked
+indiv <-wildschwein$TierID |> unique()
+
+length(indiv)
+```
+
+```{r}
+# for how long were they tracked? are there gaps?
+ggplot(wildschwein, aes(DatetimeUTC, TierName)) + geom_point()
+```
+
+```{r}
+# differences in minutes
+ggplot(wildschwein, aes(diff_s/60)) +
+  geom_histogram(binwidth = 1) +
+  lims(x = c(0,5000/60)) +
+  scale_y_log10()
+```
+
+```{r}
+# what is the temporal sampling interval between the locations
+wildschwein |> 
+  filter(DatetimeUTC < "2014-08-24") |> 
+  ggplot(aes(DatetimeUTC, diff_s, colour = TierName)) + 
+  geom_point() +
+  geom_line()
+```
+
 
 ## Task 3: Deriving movement parameters I: Speed
+
 
 ## Task 4: Cross-scale movement analysis
 
