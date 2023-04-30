@@ -1,0 +1,27 @@
+---
+title: "Exercise 2"
+author: "Aiyana Signer"
+date: "2023-04-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Task 1: Import Data
+
+## Task 2: Getting an overview
+
+## Task 3: Deriving movement parameters I: Speed
+
+## Task 4: Cross-scale movement analysis
+
+## Task 5 (optional): Deriving movement parameters II: Rolling window functions
+
+## Task 6: Add movement data to repository
+
+## Task 7: Explore movement data
+
+
+
