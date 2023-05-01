@@ -18,6 +18,7 @@ library(ggplot2)
 library(tidyverse)
 
 wildschwein <- read_delim("data/wildschwein_BE_2056.csv", ",")
+wildschwein
 
 wildschwein <- st_as_sf(wildschwein, coords = c("E", "N"), crs = 2056, remove = FALSE)
 ```
@@ -69,15 +70,97 @@ wildschwein <- wildschwein |>
   mutate(steplength_m = sqrt((E - lead(E))^2 + (N - lead(N))^2))
 
 # calculate speed (m/s)
-
 wildschwein <- wildschwein |> 
-  mutate(speed_ms = steplength_m/diff_s)
+  mutate(speed_ms = steplength_m/diff_s) 
 
 # visualizing speed histogram
 hist(log10(wildschwein$speed_ms), 100)
 ```
 
 ## Task 4: Cross-scale movement analysis
+
+```{r}
+# manually reduce granularity of sampling
+caro <- read_delim("data/caro60.csv", ",")
+
+caro <- st_as_sf(caro, coords = c("E", "N"), crs = 2056, remove = FALSE)
+
+caro_3 <- caro[seq(from = 1, to = nrow(caro), by = 3), ]
+
+caro_6 <- caro[seq(from = 1, to = nrow(caro), by = 6), ]
+
+caro_9 <- caro[seq(from = 1, to = nrow(caro), by = 9), ]
+
+nrow(caro)
+nrow(caro_3)
+nrow(caro_6)
+nrow(caro_9)
+```
+
+```{r}
+# compute timelag, steplength, and speed
+for (caro_obj in c("caro", "caro_3", "caro_6", "caro_9")) {
+  assign(caro_obj, get(caro_obj) %>% 
+           mutate(diff_s = as.integer(difftime(lead(DatetimeUTC), DatetimeUTC))) %>% 
+           mutate(steplength_m = sqrt((E - lead(E))^2 + (N - lead(N))^2)) %>% 
+           mutate(speed_ms = steplength_m/diff_s))
+}
+```
+
+```{r}
+# visualize speeds 
+# combine the four data frames into one
+caro_combined <- bind_rows(list('1 minute' = caro, 
+                                '3 minutes' = caro_3, 
+                                '6 minutes' = caro_6, 
+                                '9 minutes' = caro_9), .id = "id")
+
+# plot the speed vs. time, colored by object
+ggplot(caro_combined, aes(x = DatetimeUTC, y = speed_ms, color = id)) + 
+  geom_line() + 
+  labs(x = "Time", y = "Speed (m/s)", color = "Sampling Interval") +
+  ggtitle("Comparing derived speed at different sampling intervals") +
+  theme_minimal()
+```
+
+
+```{r} 
+# Subset of dataframe to only include rows with "1 minute" and "3 minutes" values
+subset_df <- subset(caro_combined, id %in% c("1 minute", "3 minutes"))
+
+# Plot the points using ggplot2
+library(ggplot2)
+ggplot(subset_df, aes(x = E, y = N, color = id)) + 
+  geom_point() + 
+  labs(color = "Trajectory") + 
+  ggtitle("Comparing original- with 3 minutes-resampled data") +
+  geom_path() +
+  theme_minimal()
+```
+
+```{r}
+subset_df <- subset(caro_combined, id %in% c("1 minute", "6 minutes"))
+
+library(ggplot2)
+ggplot(subset_df, aes(x = E, y = N, color = id)) + 
+  geom_point() + 
+  labs(color = "Trajectory") + 
+  ggtitle("Comparing original- with 6 minutes-resampled data") +
+  geom_path() +
+  theme_minimal()
+```
+
+```{r}
+subset_df <- subset(caro_combined, id %in% c("1 minute", "9 minutes"))
+
+library(ggplot2)
+ggplot(subset_df, aes(x = E, y = N, color = id)) + 
+  geom_point() + 
+  labs(color = "Trajectory") + 
+  ggtitle("Comparing original- with 9 minutes-resampled data") +
+  geom_path() +
+  theme_minimal()
+```
 
 ## Task 5 (optional): Deriving movement parameters II: Rolling window functions
 
