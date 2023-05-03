@@ -166,7 +166,47 @@ ggplot(subset_df, aes(x = E, y = N, color = id)) +
 
 ## Task 6: Add movement data to repository
 
+
 ## Task 7: Explore movement data
+```{r}
+# import data
+posmo <- read_delim("data/posmo_2023-01-01T00_00_00+01_00-2023-05-01T23_59_59+02_00.csv", ",")
+
+# convert to sf object (of WGS84)
+posmo <- st_as_sf(posmo, coords = c("lon_x", "lat_y"), crs = 4326, remove = FALSE, na.fail = FALSE)
+
+# transform to CH1903+ LV95 projection
+posmo <- st_transform(posmo, 2056)
+
+posmo
+
+# remov longitude and latitude that are in wgs84 coordinate system
+posmo <- posmo %>%
+  select(-lon_x, -lat_y)
+
+# plot the data
+ggplot() + 
+  geom_sf(data = posmo) +
+  coord_sf(datum = st_crs(posmo))
 
 
+# plot the data zoomed into Switzerland
+ggplot() + 
+  geom_sf(data = posmo) +
+  coord_sf(datum = st_crs(posmo)) +
+  xlim(2660000, 2760000) +
+  ylim(1220000, 1280000)
+
+```
+
+```{r}
+library(tmap)
+
+#plotting data as interactive map
+posmo_tmap <- tm_shape(posmo) +
+  tm_basemap("OpenStreetMap") +
+  tm_dots(col = "transport_mode", size = 0.1)
+
+tm_view(posmo_tmap)
+```
 
