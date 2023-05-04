@@ -1,0 +1,61 @@
+---
+title: "Week2_exercise"
+author: "Aiyana Signer"
+date: "2023-04-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Exercise 2: Toolskit Demo
+```{r}
+now <- Sys.time()
+later <- now + 1000
+
+later
+
+later - now
+
+difference <- as.numeric(difftime(later, now, units = "mins"))
+```
+
+```{r}
+# demonstrate lead and lag
+library(dplyr)
+mynumbers <- 1:10
+
+lead(mynumbers) - mynumbers
+
+lead(mynumbers, 2)
+#lag() is the opposite of the lead function
+#discards last value
+
+lag(mynumbers)
+```
+
+```{r}
+wildschwein <- tibble(
+    TierID = c(rep("Hans", 5), rep("Klara", 5)),
+    DatetimeUTC = rep(as.POSIXct("2015-01-01 00:00:00", tz = "UTC") + 0:4 * 15 * 60, 2)
+)
+
+wildschwein
+
+
+wildschwein$diff <- as.numeric(difftime(lead(wildschwein$DatetimeUTC),wildschwein$DatetimeUTC))
+
+# the same as the above code
+wildschwein <- mutate(wildschwein, diff = as.numeric(difftime(lead(lag(DatetimeUTC),DatetimeUTC)))
+                      
+wildschwein <- group_by(wildschwein, TierID)
+wildschwein <- mutate(wildschwein, diff = as.numeric(difftime(lead(lag(DatetimeUTC),DatetimeUTC)))
+
+# the same as the above 2 lines
+# with ctrl shift m
+wildschwein |> 
+  group_by(TierID) |> 
+  mutate(wildschwein, diff = as.numeric(difftime(lead(lag(DatetimeUTC),DatetimeUTC))))
+```
+
